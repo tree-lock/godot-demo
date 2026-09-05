@@ -1,0 +1,9 @@
+{
+  "godotTools.editorPath.godot4": "/Applications/Godot_mono.app/Contents/MacOS/Godot",
+  "godotTools.lsp.serverPort": 6005,
+  "dotrush.roslyn.analyzerDiagnosticsScope": 1,
+  "dotrush.roslyn.loadMetadataForReferencedProjects": true,
+  "files.exclude": {
+    "**/.godot": true
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Godot C#",
+      "type": "coreclr",
+      "request": "attach",
+      "processPath": "/Applications/Godot_mono.app/Contents/MacOS/Godot",
+      "preLaunchTask": "dotrush: Build"
+    }
+  ]
+}
