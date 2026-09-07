@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://dckvldpt7s40r"]
 
+[ext_resource type="Script" uid="uid://r2x3qyg2u4q2" path="res://scene/player.gd" id="1_fvtld"]
 [ext_resource type="Texture2D" uid="uid://btygim5cuh3pn" path="res://resources/texture/W.png" id="1_xo3ru"]
 [ext_resource type="Texture2D" uid="uid://b38va7wt3lf2w" path="res://resources/texture/浮游炮.png" id="2_hjaqi"]
 
@@ -377,6 +378,8 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_eh2me"]
 
 [node name="Player" type="CharacterBody2D" unique_id=910032154]
+script = ExtResource("1_fvtld")
+move_speed = null
 
 [node name="body-sprite" type="AnimatedSprite2D" parent="." unique_id=1395738822]
 sprite_frames = SubResource("SpriteFrames_eh2me")
@@ -385,6 +388,7 @@ autoplay = "normal_right"
 frame_progress = 0.6308254
 
 [node name="armed-effect-sprite" type="AnimatedSprite2D" parent="." unique_id=604033269]
+visible = false
 sprite_frames = SubResource("SpriteFrames_v4iqv")
 frame_progress = 0.405144
 
