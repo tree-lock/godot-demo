@@ -19,6 +19,21 @@ func _physics_process(delta: float) -> void:
 	
 	if move_input != Vector2.ZERO:
 		facing_suffix = _vector_to_facing_suffix(move_input)
+		
+	update_animation()
 
 func update_animation() -> void:
+	var animation_name := StringName("%s_%s" % [NORMAL_ANIMATION_PREFIX, facing_suffix])
 	
+	if not body_spirit.sprite_frames.has_animation(animation_name):
+		push_warning("Missing Player animation: %s" % animation_name)
+		return
+	
+	if body_spirit.animation != animation_name:
+		body_spirit.play(animation_name) 
+		
+func _vector_to_facing_suffix(direction: Vector2) -> StringName:
+	if abs(direction.x) >= abs(direction.y): 
+		return &"right" if direction.x > 0.0 else &"left"
+		
+	return &"down" if direction.y > 0.0 else &"up"
