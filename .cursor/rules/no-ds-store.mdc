@@ -1,0 +1,12 @@
+---
+description: 发现 .DS_Store 立刻删除，不要提交
+alwaysApply: true
+---
+
+# 不要保留 .DS_Store
+
+macOS 的 `.DS_Store` 对项目无用。
+
+- 发现仓库里任何 `.DS_Store`（含子目录）就立刻删除
+- 不要 `git add` / 提交它们
+- 它们已在 `.gitignore` 中；不要从 ignore 里拿掉

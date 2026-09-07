@@ -6,3 +6,8 @@
 .vs/
 bin/
 obj/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
