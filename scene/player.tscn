@@ -376,11 +376,13 @@ animations = [{
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_eh2me"]
+radius = 6.0
 
 [node name="Player" type="CharacterBody2D" unique_id=910032154]
 script = ExtResource("1_fvtld")
 
 [node name="body-sprite" type="AnimatedSprite2D" parent="." unique_id=1395738822]
+rotation = -0.0065052584
 sprite_frames = SubResource("SpriteFrames_eh2me")
 animation = &"armed_right"
 autoplay = "normal_right"
