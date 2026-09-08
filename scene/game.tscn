@@ -82,6 +82,17 @@ sources/0 = SubResource("TileSetAtlasSource_xwcet")
 [sub_resource type="SegmentShape2D" id="SegmentShape2D_lg2ml"]
 b = Vector2(256, 0)
 
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_bottom"]
+a = Vector2(0, 256)
+b = Vector2(256, 256)
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_left"]
+b = Vector2(0, 256)
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_right"]
+a = Vector2(256, 0)
+b = Vector2(256, 256)
+
 [node name="game" type="Node2D" unique_id=1845425720]
 script = ExtResource("3_game")
 
@@ -107,14 +118,17 @@ position = Vector2(127, 95)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBounds/TopBoundary" unique_id=586269724]
 shape = SubResource("SegmentShape2D_lg2ml")
 
-[node name="StaticBody2D" type="StaticBody2D" parent="WorldBounds" unique_id=1227078892]
+[node name="BottomBoundary" type="StaticBody2D" parent="WorldBounds" unique_id=1227078892]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBounds/StaticBody2D" unique_id=432008221]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBounds/BottomBoundary" unique_id=432008221]
+shape = SubResource("SegmentShape2D_bottom")
 
-[node name="StaticBody2D2" type="StaticBody2D" parent="WorldBounds" unique_id=1972657567]
+[node name="LeftBoundary" type="StaticBody2D" parent="WorldBounds" unique_id=1972657567]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBounds/StaticBody2D2" unique_id=1908841922]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBounds/LeftBoundary" unique_id=1908841922]
+shape = SubResource("SegmentShape2D_left")
 
-[node name="StaticBody2D3" type="StaticBody2D" parent="WorldBounds" unique_id=500822078]
+[node name="RightBoundary" type="StaticBody2D" parent="WorldBounds" unique_id=500822078]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBounds/StaticBody2D3" unique_id=652376870]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBounds/RightBoundary" unique_id=652376870]
+shape = SubResource("SegmentShape2D_right")
