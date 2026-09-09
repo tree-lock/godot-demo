@@ -15,10 +15,10 @@ description: >-
 ## 本项目约定
 
 - 玩家场景：`scene/player.tscn`
-- 身体：`body-sprite`（`AnimatedSprite2D`），动画在它的 `SpriteFrames` 上
+- 身体：`BodySprite`（`AnimatedSprite2D`），动画在它的 `SpriteFrames` 上
 - 图集：`res://resources/texture/W.png`（160×288，32×32 格，5 列 × 9 行）
 - 命名：`{state}_{dir}`，dir 为 `up` / `down` / `left` / `right`
-- `armed-effect-sprite` 留给枪口/特效，**不要**把整身持枪帧铺上去（会叠两个角色）
+- `ArmedEffectSprite` 留给枪口/特效，**不要**把整身持枪帧铺上去（会叠两个角色）
 
 图集行表见 [sheet.md](sheet.md)。`.tscn` 写法见 [tscn-format.md](tscn-format.md)。
 
@@ -35,7 +35,7 @@ python3 .cursor/skills/godot-sprite-frames/scripts/inspect_sheet.py resources/te
 3. 若用户说「参照 `normal_*`」：同一方向、同样帧数/速度/loop，只改图集行（通常 +4 行 = +128px）。
 4. 为每帧新增 `sub_resource AtlasTexture`，`atlas` 指向已有 `ExtResource`，`region = Rect2(x, y, w, h)`。id 不要和现有冲突。
 5. 在 `SpriteFrames.animations` 数组**末尾**追加动画对象（结构与现有条目一致：`frames` / `loop` / `name` / `speed`）。`loop` 在 Godot 4 文本里常写成 `1`。
-6. 告诉用户：Godot 若已打开该场景，执行 **Scene → Reload Saved Scene**，在 `body-sprite` 的动画下拉里检查新名字。
+6. 告诉用户：Godot 若已打开该场景，执行 **Scene → Reload Saved Scene**，在 `BodySprite` 的动画下拉里检查新名字。
 
 ## 禁止
 

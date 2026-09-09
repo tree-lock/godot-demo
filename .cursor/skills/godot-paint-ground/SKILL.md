@@ -14,8 +14,8 @@ description: >-
 ## 本项目约定
 
 - 场景：`scene/game.tscn`
-- 地面层：`gound-tile-map-layer`（拼写保持现状，不要改名）
-- 上层：`overlay-tile-map-layer`（16×32 立牌）
+- 地面层：`GoundTileMapLayer`（拼写保持现状，不要改名）
+- 上层：`OverlayTileMapLayer`（16×32 立牌）
 - 网格：16×16，格子 16px；相机 `offset=(128,128)` `zoom=2`
 - 只使用 TileSet 里**已经定义**的 atlas 坐标
 
