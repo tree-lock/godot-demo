@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://b0uolk87d1pmt"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_eh2me"]
+radius = 6.0
+
+[node name="Pickup" type="Area2D" unique_id=1633365479]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=775761786]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1034710392]
+shape = SubResource("CircleShape2D_eh2me")
+
+[node name="LifeTimer" type="Timer" parent="." unique_id=1843591227]
+wait_time = 5.0

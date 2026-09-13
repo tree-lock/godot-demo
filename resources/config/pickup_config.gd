@@ -32,3 +32,19 @@ enum ShotPattern {
 @export_group("显示资源")
 
 @export var icon_texture: Texture2D
+
+
+@export_group("BUFF效果")
+
+@export_range(0.0, 120.0, 0.1, "or_greater") var duration: float = 5.0
+
+@export_range(0.1, 5.0, 0.05, "or_greater") var move_speed_multiplier: float = 1.0
+
+@export_range(0.1, 5.0, 0.05, "or_greater") var fire_rate_multiplier: float = 1.0
+
+
+@export_group("形态与弹幕")
+
+@export var player_form_mode: PlayerFormMode = PlayerFormMode.NORMAL
+
+@export var shot_pattern: ShotPattern = ShotPattern.NORMAL
