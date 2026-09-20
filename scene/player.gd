@@ -1,22 +1,7 @@
 extends CharacterBody2D
 class_name Player
 
-const NORMAL_ANIMATION_PREFIX := &"normal"
-
 const BULLET_SCENE := preload("res://scene/Bullet.tscn")
-const ARMED_ANIMATION_PREFIX := &"armed"
-const DEFAULT_FIRE_RATE_MULTIPLIRE := 1.0
-const SPIRAL_PHASE_STEP := PI / 12
-
-enum PlayerFormMode {
-	NORMAL,
-	SPIRAL,
-}
-
-enum ShotPattern {
-	NORMAL,
-	SPIRAL,
-}
 
 @onready var body_spirit: AnimatedSprite2D = $BodySprite
 @onready var shooting_timer: Timer = $ShootingTimer
@@ -29,29 +14,39 @@ enum ShotPattern {
 
 @export var bullet_spawn_distance: float = 18.0
 
+@export var spiral_phase_step: float = PI / 12
+
 var facing_suffix: StringName = &"right"
 
-var rapid_fire_rate_multiplier: float = DEFAULT_FIRE_RATE_MULTIPLIRE
-var form_fire_rate_multiplier: float = DEFAULT_FIRE_RATE_MULTIPLIRE
-var current_form_mode: PlayerFormMode = PlayerFormMode.NORMAL
-var current_short_pattern: ShotPattern = ShotPattern.NORMAL
+var move_speed_multiplier: float = 1.0
+var rapid_fire_rate_multiplier: float = 1.0
+var form_fire_rate_multiplier: float = 1.0
+var current_form_mode: PickupConfig.PlayerFormMode = PickupConfig.PlayerFormMode.NORMAL
+var current_short_pattern: PickupConfig.ShotPattern = PickupConfig.ShotPattern.NORMAL
 var spiral_phase: float = 0.0
+
+var speed_buff_timer: Timer
+var rapid_buff_timer: Timer
+var form_buff_timer: Timer
 
 
 func _ready() -> void:	
 	shooting_timer.one_shot = true
 	shooting_timer.wait_time = _get_effective_fire_interval()
+	speed_buff_timer = _create_buff_timer(_on_speed_buff_timeout)
+	rapid_buff_timer = _create_buff_timer(_on_rapid_buff_timeout)
+	form_buff_timer = _create_buff_timer(_on_form_buff_timeout)
 	_update_animation()
 	_update_armed_effect()
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	var move_input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var shoot_input := Input.get_vector("shoot_left", "shoot_right", "shoot_up", "shoot_down")
 	
-	velocity = move_input * move_speed
+	velocity = move_input * move_speed * move_speed_multiplier
 	move_and_slide()
 	
-	if current_short_pattern == ShotPattern.SPIRAL:
+	if _is_spiral_pattern():
 		_try_auto_spiral_shoot()
 	elif shoot_input != Vector2.ZERO:
 		_try_shoot(shoot_input)
@@ -60,11 +55,72 @@ func _physics_process(delta: float) -> void:
 	_update_animation()
 	_update_armed_effect()
 
+func apply_config(config: PickupConfig) -> bool:
+	if config == null:
+		return false
+	
+	match config.pickup_type:
+		PickupConfig.PickupType.SPEED:
+			_apply_speed_buff(config)
+		PickupConfig.PickupType.RAPID:
+			_apply_rapid_buff(config)
+		PickupConfig.PickupType.SPIRAL:
+			_apply_form_buff(config)
+		_:
+			return false
+	
+	return true
+
+func _apply_speed_buff(config: PickupConfig) -> void:
+	move_speed_multiplier = config.move_speed_multiplier
+	_restart_buff_timer(speed_buff_timer, config.duration)
+
+func _apply_rapid_buff(config: PickupConfig) -> void:
+	rapid_fire_rate_multiplier = config.fire_rate_multiplier
+	_restart_buff_timer(rapid_buff_timer, config.duration)
+	_refresh_shooting_interval()
+
+func _apply_form_buff(config: PickupConfig) -> void:
+	current_form_mode = config.player_form_mode
+	current_short_pattern = config.shot_pattern
+	form_fire_rate_multiplier = config.fire_rate_multiplier
+	_restart_buff_timer(form_buff_timer, config.duration)
+	_refresh_shooting_interval()
+
+func _on_speed_buff_timeout() -> void:
+	move_speed_multiplier = 1.0
+
+func _on_rapid_buff_timeout() -> void:
+	rapid_fire_rate_multiplier = _get_default_fire_rate_multiplier()
+	_refresh_shooting_interval()
+
+func _on_form_buff_timeout() -> void:
+	current_form_mode = PickupConfig.PlayerFormMode.NORMAL
+	current_short_pattern = PickupConfig.ShotPattern.NORMAL
+	form_fire_rate_multiplier = _get_default_fire_rate_multiplier()
+	_refresh_shooting_interval()
+
+func _create_buff_timer(timeout_callback: Callable) -> Timer:
+	var timer := Timer.new()
+	timer.one_shot = true
+	timer.timeout.connect(timeout_callback)
+	add_child(timer)
+	return timer
+
+func _restart_buff_timer(timer: Timer, duration: float) -> void:
+	timer.stop()
+	if duration <= 0.0:
+		return
+	timer.start(duration)
+
+func _refresh_shooting_interval() -> void:
+	shooting_timer.wait_time = _get_effective_fire_interval()
+
 func _update_animation() -> void:
 	var animation_name := StringName("%s_%s" % [_get_animation_prefix(), facing_suffix])
 	
 	if not body_spirit.sprite_frames.has_animation(animation_name):
-		var fallback_animation_name := StringName("%s_%s" % [NORMAL_ANIMATION_PREFIX, facing_suffix])
+		var fallback_animation_name := StringName("%s_%s" % [&"normal", facing_suffix])
 		push_warning("Missing player animation: %s" % animation_name)
 		if not body_spirit.sprite_frames.has_animation(fallback_animation_name):
 			return
@@ -74,7 +130,7 @@ func _update_animation() -> void:
 		body_spirit.play(animation_name)
 		
 func _update_facing(move_input: Vector2, shoot_input: Vector2) -> void:
-	if current_form_mode == PlayerFormMode.SPIRAL:
+	if _is_armed_form():
 		if move_input != Vector2.ZERO:
 			facing_suffix = _vector_to_facing_suffix(move_input)
 		return
@@ -94,10 +150,10 @@ func _try_shoot(shoot_input: Vector2) -> void:
 		shooting_timer.start(_get_effective_fire_interval())
 		
 func _fire_bullet(shoot_direction: Vector2) -> bool:
-	if current_short_pattern == ShotPattern.SPIRAL:
+	if _is_spiral_pattern():
 		var has_spawned_forward_bullet = _spawn_bullet(shoot_direction)
 		var has_spawned_back_bullet = _spawn_bullet(shoot_direction.rotated(PI))
-		spiral_phase = wrapf(spiral_phase + SPIRAL_PHASE_STEP, 0.0, TAU)
+		spiral_phase = wrapf(spiral_phase + spiral_phase_step, 0.0, TAU)
 		return has_spawned_forward_bullet or has_spawned_back_bullet
 	
 	return _spawn_bullet(shoot_direction)
@@ -127,7 +183,7 @@ func _try_auto_spiral_shoot() -> void:
 	if has_spawned_bullet:
 		shooting_timer.start(_get_effective_fire_interval())
 
-func  _get_effective_fire_interval() -> float:
+func _get_effective_fire_interval() -> float:
 	return maxf(fire_interval / _get_effective_fire_rate_multiplier(), 0.01)
 	
 func _get_effective_fire_rate_multiplier() -> float:
@@ -136,22 +192,26 @@ func _get_effective_fire_rate_multiplier() -> float:
 	
 	return maxf(rapid_fire_rate_multiplier, 0.01)
 
+func _get_default_fire_rate_multiplier() -> float:
+	return 1.0
+
 func _has_active_form_override() -> bool:
-	return (
-		current_form_mode != PlayerFormMode.NORMAL
-		and current_short_pattern != ShotPattern.NORMAL
-	)
+	return _is_armed_form() and _is_spiral_pattern()
+
+func _is_armed_form() -> bool:
+	return current_form_mode == PickupConfig.PlayerFormMode.ARMED
+
+func _is_spiral_pattern() -> bool:
+	return current_short_pattern == PickupConfig.ShotPattern.SPIRAL
 	
 func _get_animation_prefix() -> StringName:
-	if current_form_mode == PlayerFormMode.SPIRAL:
-		return ARMED_ANIMATION_PREFIX
+	if _is_armed_form():
+		return &"armed"
 	
-	return NORMAL_ANIMATION_PREFIX
+	return &"normal"
 	
 func _update_armed_effect() -> void:
-	var is_armed := current_form_mode == PlayerFormMode.SPIRAL
-	
-	if not is_armed: 
+	if not _is_armed_form(): 
 		if armed_effect_sprite.visible:
 			armed_effect_sprite.visible = false
 		if armed_effect_sprite.is_playing():
@@ -166,9 +226,8 @@ func _update_armed_effect() -> void:
 		push_warning("Sprite Frames of ArmedEffectSprite not found")
 		return
 	
-	const default_animation := &"default"
-	if armed_effect_sprite.sprite_frames.has_animation(default_animation):
-		armed_effect_sprite.play(default_animation)
+	if armed_effect_sprite.sprite_frames.has_animation(&"default"):
+		armed_effect_sprite.play(&"default")
 	
 		
 func _vector_to_facing_suffix(direction: Vector2) -> StringName:
