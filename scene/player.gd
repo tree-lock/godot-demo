@@ -1,4 +1,5 @@
 extends CharacterBody2D
+class_name Player
 
 const NORMAL_ANIMATION_PREFIX := &"normal"
 
