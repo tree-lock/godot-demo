@@ -1,13 +1,24 @@
 ---
-description: Godot 4.7 C# 项目约定，避免 GDScript 和 Godot 3 写法
+description: Godot 4.7 脚本约定。新脚本默认 GDScript，已有 C# 文件继续用 C#
 alwaysApply: true
 ---
 
-# Godot 4.7 C#
+# Godot 4.7
 
-这是 Godot 4.7 的 **C#** 2D 项目（Jolt 物理）。脚本用 `.cs`，不要写 GDScript。
+这是 Godot 4.7 的 2D 项目（Jolt 物理）。新脚本默认用 **GDScript**（`.gd`），与现有 `pickup_config.gd`、`player.gd`、`bullet.gd` 一致。
 
-## API
+## GDScript
+
+- 配置资源：`extends Resource`、`class_name`、`@export`、`@export_group`、`@export_range`
+- 节点脚本：`extends` 对应节点类型；节点用 `$Path` 或 `get_node()`
+- 信号用 GDScript 的 `signal`
+- 移动：改 `velocity`，调用无参 `move_and_slide()`
+- 异步用 `await`，不要 `yield`
+- 不要用 Godot 3 API（`KinematicBody2D`、带参 `move_and_slide` 等）
+
+## 已有 C# 文件
+
+已有的 `Game.cs` 保持 C#。只有继续改 `.cs` 时才用这些写法：
 
 - 类必须是 `partial class`，并继承节点类型（如 `CharacterBody2D`）
 - 用 `[Export]`、`[Signal]`，不要 `@export` / `signal`
@@ -15,10 +26,9 @@ alwaysApply: true
 - 信号用 C# 事件：`Button.Pressed += OnPressed;`
 - 移动：改 `Velocity`，调用无参 `MoveAndSlide()`
 - 异步用 `await ToSignal(...)`，不要 `yield`
-- 不要用 Godot 3 API（`KinematicBody2D`、带参 `MoveAndSlide` 等）
+- 脚本文件 PascalCase，与类名一致（如 `Player.cs`）
 
 ## 文件
 
-- 脚本文件 PascalCase，与类名一致（如 `Player.cs`）
 - 不要手改 `.godot/`、`.import`、大段 TileMap 二进制数据
 - `.csproj` 的 `Godot.NET.Sdk` 版本跟编辑器走，不要乱改
