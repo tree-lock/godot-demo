@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EnemyConfig" format=3 uid="uid://68cc6tu00saj"]
+
+[ext_resource type="Script" uid="uid://chl104ixvjuc5" path="res://resources/config/enemy_config.gd" id="1_script"]
+[ext_resource type="SpriteFrames" uid="uid://cchglx7e3rsx2" path="res://resources/animation/enemy_shelled.tres" id="2_frames"]
+
+[resource]
+script = ExtResource("1_script")
+enemy_type = 1
+display_name = "带壳敌人"
+max_health = 6
+move_speed = 10.0
+collision_radius = 10.0
+enemy_frames = ExtResource("2_frames")
+pickup_drop_chance = 0.8
+metadata/_custom_type_script = "uid://chl104ixvjuc5"

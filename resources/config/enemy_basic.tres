@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EnemyConfig" format=3 uid="uid://b7k2nq8w3m1c4"]
+
+[ext_resource type="Script" uid="uid://chl104ixvjuc5" path="res://resources/config/enemy_config.gd" id="1_script"]
+[ext_resource type="SpriteFrames" uid="uid://b5m7eme0or7bd" path="res://resources/animation/enemy_basics.tres" id="2_frames"]
+[ext_resource type="Script" uid="uid://dl8e4eofk1vub" path="res://resources/config/pickup_config.gd" id="3_pickup"]
+[ext_resource type="Resource" uid="uid://dbm1the03crmq" path="res://resources/config/pickup_speed.tres" id="4_speed"]
+[ext_resource type="Resource" uid="uid://c3ll277ah3gg4" path="res://resources/config/pickup_rapid.tres" id="5_rapid"]
+
+[resource]
+script = ExtResource("1_script")
+move_speed = 20.0
+collision_radius = 6.0
+enemy_frames = ExtResource("2_frames")
+pickup_drop_chance = 0.2
+pickup_drop_configs = Array[ExtResource("3_pickup")]([ExtResource("4_speed"), ExtResource("5_rapid")])
+metadata/_custom_type_script = "uid://chl104ixvjuc5"
