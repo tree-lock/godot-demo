@@ -2,6 +2,7 @@ extends CharacterBody2D
 class_name Player
 
 const BULLET_SCENE := preload("res://scene/Bullet.tscn")
+const DEATH_ANIMATION_NAME := &"death"
 
 @onready var body_spirit: AnimatedSprite2D = $BodySprite
 @onready var shooting_timer: Timer = $ShootingTimer
@@ -16,7 +17,11 @@ const BULLET_SCENE := preload("res://scene/Bullet.tscn")
 
 @export var spiral_phase_step: float = PI / 12
 
+@export var max_health: int = 3
+
 var facing_suffix: StringName = &"right"
+var current_health: int = 3
+var is_dead: bool = false
 
 var move_speed_multiplier: float = 1.0
 var rapid_fire_rate_multiplier: float = 1.0
@@ -31,6 +36,7 @@ var form_buff_timer: Timer
 
 
 func _ready() -> void:	
+	current_health = max_health
 	shooting_timer.one_shot = true
 	shooting_timer.wait_time = _get_effective_fire_interval()
 	speed_buff_timer = _create_buff_timer(_on_speed_buff_timeout)
@@ -39,7 +45,39 @@ func _ready() -> void:
 	_update_animation()
 	_update_armed_effect()
 
+func apply_damage(amount: int) -> bool:
+	if is_dead or amount <= 0:
+		return false
+
+	current_health -= amount
+	if current_health <= 0:
+		current_health = 0
+		_die()
+	return true
+
+func _die() -> void:
+	if is_dead:
+		return
+
+	is_dead = true
+	velocity = Vector2.ZERO
+	shooting_timer.stop()
+	armed_effect_sprite.visible = false
+	if armed_effect_sprite.is_playing():
+		armed_effect_sprite.stop()
+
+	if body_spirit.sprite_frames == null or not body_spirit.sprite_frames.has_animation(DEATH_ANIMATION_NAME):
+		push_warning("Missing player animation: %s" % DEATH_ANIMATION_NAME)
+		return
+
+	body_spirit.sprite_frames.set_animation_loop(DEATH_ANIMATION_NAME, false)
+	body_spirit.play(DEATH_ANIMATION_NAME)
+
 func _physics_process(_delta: float) -> void:
+	if is_dead:
+		velocity = Vector2.ZERO
+		return
+
 	var move_input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var shoot_input := Input.get_vector("shoot_left", "shoot_right", "shoot_up", "shoot_down")
 	
