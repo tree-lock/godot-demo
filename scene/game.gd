@@ -34,6 +34,9 @@ const RESULT_OK_BUTTON_TEXT := "结束游戏"
 @onready var life_count_label: Label = $HUDLayer/LifeCountLabel
 @onready var time_bar: Sprite2D = $HUDLayer/TimeBar
 @onready var result_dialog: AcceptDialog = $AcceptDialog
+@onready var bgm_player: AudioStreamPlayer = $AudioContainer/BgmPlayer
+@onready var result_win_sfx_player: AudioStreamPlayer = $AudioContainer/ResultWinSfxPlayer
+@onready var result_loss_sfx_player: AudioStreamPlayer = $AudioContainer/ResultLossSfxPlayer
 
 
 var random_generator: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -56,6 +59,7 @@ func _ready() -> void:
 	_configure_enemy_spawn_timer()
 	_spawn_initial_enemies()
 	_start_enemy_spawn_timer()
+	_start_bgm()
 
 func _process(delta: float) -> void:
 	if is_result_displayed:
@@ -137,13 +141,29 @@ func _show_result_dialog(title: String, result_message: String) -> void:
 	is_result_displayed = true
 	result_dialog.title = title
 	result_dialog.dialog_text = result_message
+	bgm_player.stop()
 	_stop_world()
+	_play_result_sfx(title == RESULT_TITLE_WIN)
 	result_dialog.popup_centered()
 
 	var ok_button := result_dialog.get_ok_button()
 	if ok_button != null:
 		ok_button.grab_focus()
 
+
+func _start_bgm() -> void:
+	if bgm_player.stream != null:
+		var bgm_stream := bgm_player.stream.duplicate() as AudioStreamMP3
+		if bgm_stream != null:
+			bgm_stream.loop = true
+			bgm_player.stream = bgm_stream
+	bgm_player.play()
+
+func _play_result_sfx(is_win: bool) -> void:
+	if is_win:
+		result_win_sfx_player.play()
+		return
+	result_loss_sfx_player.play()
 
 func _stop_world() -> void:
 	enemy_spawn_timer.stop()

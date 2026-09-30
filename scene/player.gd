@@ -10,6 +10,9 @@ const BULLET_SPAWN_MARGIN := 1.0
 @onready var body_spirit: AnimatedSprite2D = $BodySprite
 @onready var shooting_timer: Timer = $ShootingTimer
 @onready var armed_effect_sprite: AnimatedSprite2D = $ArmedEffectSprite
+@onready var shoot_sfx_player: AudioStreamPlayer = $AudioContainer/ShootSfxPlayer
+@onready var move_sfx_player: AudioStreamPlayer = $AudioContainer/MoveSfxPlayer
+@onready var pickup_sfx_player: AudioStreamPlayer = $AudioContainer/PickupSfxPlayer
 
 
 @export var move_speed: float = 120
@@ -47,6 +50,7 @@ func _ready() -> void:
 	speed_buff_timer = _create_buff_timer(_on_speed_buff_timeout)
 	rapid_buff_timer = _create_buff_timer(_on_rapid_buff_timeout)
 	form_buff_timer = _create_buff_timer(_on_form_buff_timeout)
+	_configure_move_sfx()
 	_update_animation()
 	_update_armed_effect()
 
@@ -90,6 +94,7 @@ func _physics_process(delta: float) -> void:
 	_update_hurt_blink(delta)
 	if is_dead:
 		velocity = Vector2.ZERO
+		_update_move_sfx()
 		return
 
 	var move_input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
@@ -106,6 +111,7 @@ func _physics_process(delta: float) -> void:
 	_update_facing(move_input, shoot_input)
 	_update_animation()
 	_update_armed_effect()
+	_update_move_sfx()
 
 func apply_config(config: PickupConfig) -> bool:
 	if config == null:
@@ -121,6 +127,7 @@ func apply_config(config: PickupConfig) -> bool:
 		_:
 			return false
 	
+	pickup_sfx_player.play()
 	return true
 
 func _apply_speed_buff(config: PickupConfig) -> void:
@@ -168,6 +175,27 @@ func _restart_buff_timer(timer: Timer, duration: float) -> void:
 func _refresh_shooting_interval() -> void:
 	shooting_timer.wait_time = _get_effective_fire_interval()
 
+func _configure_move_sfx() -> void:
+	if move_sfx_player.stream == null:
+		return
+
+	var footstep := move_sfx_player.stream.duplicate() as AudioStreamWAV
+	if footstep == null:
+		return
+
+	footstep.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	move_sfx_player.stream = footstep
+
+func _update_move_sfx() -> void:
+	var is_moving := not is_dead and velocity.length_squared() > 0.0
+	if is_moving:
+		if not move_sfx_player.playing:
+			move_sfx_player.play()
+		return
+
+	if move_sfx_player.playing:
+		move_sfx_player.stop()
+
 func _update_animation() -> void:
 	var animation_name := StringName("%s_%s" % [_get_animation_prefix(), facing_suffix])
 	
@@ -202,13 +230,18 @@ func _try_shoot(shoot_input: Vector2) -> void:
 		shooting_timer.start(_get_effective_fire_interval())
 		
 func _fire_bullet(shoot_direction: Vector2) -> bool:
+	var has_spawned_bullet := false
 	if _is_spiral_pattern():
 		var has_spawned_forward_bullet = _spawn_bullet(shoot_direction)
 		var has_spawned_back_bullet = _spawn_bullet(shoot_direction.rotated(PI))
 		spiral_phase = wrapf(spiral_phase + spiral_phase_step, 0.0, TAU)
-		return has_spawned_forward_bullet or has_spawned_back_bullet
-	
-	return _spawn_bullet(shoot_direction)
+		has_spawned_bullet = has_spawned_forward_bullet or has_spawned_back_bullet
+	else:
+		has_spawned_bullet = _spawn_bullet(shoot_direction)
+
+	if has_spawned_bullet:
+		shoot_sfx_player.play()
+	return has_spawned_bullet
 	
 func _spawn_bullet(spawn_direction: Vector2) -> bool:
 	var bullet := BULLET_SCENE.instantiate() as Bullet
