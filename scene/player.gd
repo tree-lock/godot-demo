@@ -4,6 +4,8 @@ class_name Player
 const BULLET_SCENE := preload("res://scene/Bullet.tscn")
 const DEATH_ANIMATION_NAME := &"death"
 const BLINK_ENABLED_SHADER_PARAMETER := &"blink_enabled"
+const WORLD_COLLISION_MASK := 1
+const BULLET_SPAWN_MARGIN := 1.0
 
 @onready var body_spirit: AnimatedSprite2D = $BodySprite
 @onready var shooting_timer: Timer = $ShootingTimer
@@ -209,17 +211,44 @@ func _spawn_bullet(spawn_direction: Vector2) -> bool:
 	var bullet := BULLET_SCENE.instantiate() as Bullet
 	if bullet == null:
 		return false
-	
+
+	if not _can_spawn_bullet(spawn_direction, _get_bullet_body_radius(bullet)):
+		bullet.free()
+		return false
+
 	bullet.top_level = true
 	bullet.setup(spawn_direction)
-	
+
 	var spawn_parent := get_tree().current_scene
 	if spawn_parent == null:
-		return true
-		
-	spawn_parent.add_child(bullet)
+		bullet.free()
+		return false
+
 	bullet.global_position = global_position + spawn_direction * bullet_spawn_distance
+	spawn_parent.add_child(bullet)
 	return true
+
+func _can_spawn_bullet(direction: Vector2, bullet_radius: float) -> bool:
+	var origin := global_position
+	var spawn_position := origin + direction * bullet_spawn_distance
+	var space_state := get_world_2d().direct_space_state
+	if space_state == null:
+		return true
+
+	var query := PhysicsRayQueryParameters2D.create(
+		origin,
+		spawn_position + direction * (bullet_radius + BULLET_SPAWN_MARGIN),
+		WORLD_COLLISION_MASK
+	)
+	query.collide_with_bodies = true
+	query.collide_with_areas = false
+	return space_state.intersect_ray(query).is_empty()
+
+func _get_bullet_body_radius(bullet: Bullet) -> float:
+	var shape_node := bullet.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if shape_node != null and shape_node.shape is CircleShape2D:
+		return (shape_node.shape as CircleShape2D).radius
+	return 0.0
 
 func _try_auto_spiral_shoot() -> void:
 	if not shooting_timer.is_stopped():
