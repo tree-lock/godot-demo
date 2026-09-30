@@ -8,6 +8,8 @@
 [ext_resource type="Resource" uid="uid://dbm1the03crmq" path="res://resources/config/pickup_speed.tres" id="6_speed"]
 [ext_resource type="Resource" uid="uid://c3ll277ah3gg4" path="res://resources/config/pickup_rapid.tres" id="7_rapid"]
 [ext_resource type="Resource" uid="uid://dxrgwyvqpulx6" path="res://resources/config/pickup_spiral.tres" id="8_spiral"]
+[ext_resource type="Texture2D" uid="uid://ddoub6ft5t0mk" path="res://resources/texture/道具ui.png" id="9_yq8tf"]
+[ext_resource type="FontFile" uid="uid://b0j126tauwsk3" path="res://resources/font/IPix.ttf" id="10_ym5sv"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_dbls1"]
 texture = ExtResource("1_5kiuu")
@@ -163,3 +165,41 @@ shape = SubResource("SegmentShape2D_left")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBounds/RightBoundary" unique_id=652376870]
 shape = SubResource("SegmentShape2D_right")
+
+[node name="HUDLayer" type="Node2D" parent="." unique_id=520398305]
+
+[node name="LifeIcon" type="Sprite2D" parent="HUDLayer" unique_id=1699730438]
+position = Vector2(-48, 16)
+texture = ExtResource("9_yq8tf")
+region_enabled = true
+region_rect = Rect2(0, 18, 16, 11)
+
+[node name="LifeCountLabel" type="Label" parent="HUDLayer" unique_id=20583466]
+offset_left = -36.0
+offset_top = 7.0
+offset_right = 4.0
+offset_bottom = 30.0
+theme_override_fonts/font = ExtResource("10_ym5sv")
+text = "x 5"
+
+[node name="TimeIcon" type="Sprite2D" parent="HUDLayer" unique_id=2131831594]
+position = Vector2(11, -14)
+texture = ExtResource("9_yq8tf")
+region_enabled = true
+region_rect = Rect2(3, 2, 11, 13)
+
+[node name="TimeBar" type="Sprite2D" parent="HUDLayer" unique_id=904459358]
+position = Vector2(133, -13)
+scale = Vector2(4.6666665, 1)
+texture = ExtResource("9_yq8tf")
+region_enabled = true
+region_rect = Rect2(16, 6, 48, 7)
+
+[node name="AcceptDialog" type="AcceptDialog" parent="." unique_id=1438639424]
+process_mode = 2
+oversampling_override = 1.0
+title = "游戏结束"
+size = Vector2i(200, 100)
+unresizable = true
+ok_button_text = "好了 "
+dialog_text = "666"
