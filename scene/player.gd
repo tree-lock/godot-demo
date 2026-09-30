@@ -3,6 +3,7 @@ class_name Player
 
 const BULLET_SCENE := preload("res://scene/Bullet.tscn")
 const DEATH_ANIMATION_NAME := &"death"
+const BLINK_ENABLED_SHADER_PARAMETER := &"blink_enabled"
 
 @onready var body_spirit: AnimatedSprite2D = $BodySprite
 @onready var shooting_timer: Timer = $ShootingTimer
@@ -17,11 +18,13 @@ const DEATH_ANIMATION_NAME := &"death"
 
 @export var spiral_phase_step: float = PI / 12
 
-@export var max_health: int = 3
+@export var max_health: int = 5
+@export var hurt_invincible_duration: float = 1.0
 
 var facing_suffix: StringName = &"right"
-var current_health: int = 3
+var current_health: int = 5
 var is_dead: bool = false
+var hurt_invincible_time_left: float = 0.0
 
 var move_speed_multiplier: float = 1.0
 var rapid_fire_rate_multiplier: float = 1.0
@@ -46,13 +49,16 @@ func _ready() -> void:
 	_update_armed_effect()
 
 func apply_damage(amount: int) -> bool:
-	if is_dead or amount <= 0:
+	if is_dead or amount <= 0 or hurt_invincible_time_left > 0.0:
 		return false
 
 	current_health -= amount
 	if current_health <= 0:
 		current_health = 0
 		_die()
+		return true
+
+	_start_hurt_blink()
 	return true
 
 func _die() -> void:
@@ -60,6 +66,8 @@ func _die() -> void:
 		return
 
 	is_dead = true
+	hurt_invincible_time_left = 0.0
+	_set_hurt_blink_enabled(false)
 	velocity = Vector2.ZERO
 	shooting_timer.stop()
 	armed_effect_sprite.visible = false
@@ -73,7 +81,8 @@ func _die() -> void:
 	body_spirit.sprite_frames.set_animation_loop(DEATH_ANIMATION_NAME, false)
 	body_spirit.play(DEATH_ANIMATION_NAME)
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	_update_hurt_blink(delta)
 	if is_dead:
 		velocity = Vector2.ZERO
 		return
@@ -268,6 +277,30 @@ func _update_armed_effect() -> void:
 		armed_effect_sprite.play(&"default")
 	
 		
+func _start_hurt_blink() -> void:
+	if hurt_invincible_duration <= 0.0:
+		return
+
+	hurt_invincible_time_left = hurt_invincible_duration
+	_set_hurt_blink_enabled(true)
+
+func _update_hurt_blink(delta: float) -> void:
+	if hurt_invincible_time_left <= 0.0:
+		return
+
+	hurt_invincible_time_left = maxf(hurt_invincible_time_left - delta, 0.0)
+	if hurt_invincible_time_left > 0.0:
+		return
+
+	_set_hurt_blink_enabled(false)
+
+func _set_hurt_blink_enabled(enabled: bool) -> void:
+	var shader_material := body_spirit.material as ShaderMaterial
+	if shader_material == null:
+		return
+
+	shader_material.set_shader_parameter(BLINK_ENABLED_SHADER_PARAMETER, enabled)
+
 func _vector_to_facing_suffix(direction: Vector2) -> StringName:
 	if abs(direction.x) >= abs(direction.y): 
 		return &"right" if direction.x > 0.0 else &"left"
