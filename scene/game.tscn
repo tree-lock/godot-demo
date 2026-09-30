@@ -99,6 +99,10 @@ b = Vector2(0, 256)
 a = Vector2(256, 0)
 b = Vector2(256, 256)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_lg2ml"]
+atlas = ExtResource("9_yq8tf")
+region = Rect2(16, 6, 48, 7)
+
 [node name="Game" type="Node2D" unique_id=1845425720]
 script = ExtResource("1_ll5lq")
 
@@ -191,8 +195,7 @@ region_rect = Rect2(3, 2, 11, 13)
 [node name="TimeBar" type="Sprite2D" parent="HUDLayer" unique_id=904459358]
 position = Vector2(133, -13)
 scale = Vector2(4.6666665, 1)
-texture = ExtResource("9_yq8tf")
-region_enabled = true
+texture = SubResource("AtlasTexture_lg2ml")
 region_rect = Rect2(16, 6, 48, 7)
 
 [node name="AcceptDialog" type="AcceptDialog" parent="." unique_id=1438639424]

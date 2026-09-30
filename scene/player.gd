@@ -50,6 +50,9 @@ func _ready() -> void:
 	_update_animation()
 	_update_armed_effect()
 
+func get_current_health() -> int:
+	return current_health
+
 func apply_damage(amount: int) -> bool:
 	if is_dead or amount <= 0 or hurt_invincible_time_left > 0.0:
 		return false
