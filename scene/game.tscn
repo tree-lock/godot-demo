@@ -1,8 +1,8 @@
 [gd_scene format=4 uid="uid://ds5ysap1rajhg"]
 
 [ext_resource type="Texture2D" uid="uid://dfjrxhxbec5o3" path="res://resources/texture/瓦片.png" id="1_5kiuu"]
+[ext_resource type="Script" uid="uid://di2anctguisdo" path="res://scene/game.gd" id="1_ll5lq"]
 [ext_resource type="Texture2D" uid="uid://bqgv27jij08vv" path="res://resources/texture/动态瓦片.png" id="2_dbls1"]
-[ext_resource type="Script" uid="uid://cew6s8l7jtjyl" path="res://scene/Game.cs" id="3_game"]
 [ext_resource type="PackedScene" uid="uid://dckvldpt7s40r" path="res://scene/player.tscn" id="4_xwcet"]
 [ext_resource type="PackedScene" uid="uid://b0uolk87d1pmt" path="res://scene/pickup.tscn" id="5_pickup"]
 [ext_resource type="Resource" uid="uid://dbm1the03crmq" path="res://resources/config/pickup_speed.tres" id="6_speed"]
@@ -98,7 +98,7 @@ a = Vector2(256, 0)
 b = Vector2(256, 256)
 
 [node name="Game" type="Node2D" unique_id=1845425720]
-script = ExtResource("3_game")
+script = ExtResource("1_ll5lq")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=523709867]
 offset = Vector2(128, 128)
@@ -126,6 +126,21 @@ config = ExtResource("7_rapid")
 [node name="PickupSpiral" parent="." unique_id=1633365482 instance=ExtResource("5_pickup")]
 position = Vector2(176, 128)
 config = ExtResource("8_spiral")
+
+[node name="EnemyContainer" type="Node2D" parent="." unique_id=2043613152]
+
+[node name="EnemySpawnPoints" type="Node2D" parent="." unique_id=2071621514]
+
+[node name="SpawnLeft" type="Marker2D" parent="EnemySpawnPoints" unique_id=1300541307]
+position = Vector2(8, 144)
+
+[node name="SpawnRight" type="Marker2D" parent="EnemySpawnPoints" unique_id=191276585]
+position = Vector2(248, 144)
+
+[node name="SpawnBottom" type="Marker2D" parent="EnemySpawnPoints" unique_id=1639588383]
+position = Vector2(144, 248)
+
+[node name="EnemySpawnTimer" type="Timer" parent="." unique_id=2073765975]
 
 [node name="WorldBounds" type="Node2D" parent="." unique_id=344450288]
 
